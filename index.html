@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>rifqi</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+  body {
+    margin: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Roboto Mono', monospace;
+    color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    user-select: none;
+  }
+  .container {
+    background: #2a2a72;
+    border-radius: 15px;
+    padding: 40px 50px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    max-width: 480px;
+    width: 90%;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 1rem;
+    font-weight: 900;
+    font-size: 2.75rem;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #ac73ff;
+  }
+  label {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    text-align: left;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1.25rem;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    margin-bottom: 20px;
+    box-shadow: inset 0 0 6px #9a8bff;
+    background: #3b3b8e;
+    color: #f0f0f0;
+    transition: background 0.3s ease;
+  }
+  input[type="text"]:focus {
+    background: #514fbf;
+    box-shadow: inset 0 0 8px #c0a2ff;
+  }
+  button {
+    background: #ac73ff;
+    border: none;
+    border-radius: 50px;
+    padding: 15px 40px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 5px 15px #ac73ffcc;
+    transition: all 0.3s ease;
+  }
+  button:hover {
+    background: #8857ff;
+    box-shadow: 0 8px 25px #8857ffbb;
+  }
+  .result {
+    margin-top: 30px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    min-height: 48px;
+    color: #ffd700;
+    text-shadow: 0 0 6px #ffdd55;
+  }
+  .error {
+    color: #ff6b6b;
+    text-shadow: 0 0 6px #ff4c4c;
+  }
+  footer {
+    margin-top: 40px;
+    font-size: 0.85rem;
+    color: #bbb;
+  }
+</style>
+</head>
+<body>
+  <div class="container" role="main">
+    <h1>ini web matematika</h1></h1>
+    <label for="questionInput">masukin disini soal nya:</label>
+    <input
+      type="text"
+      id="questionInput"
+      placeholder="e.g. (2+3)*5 - 4 / 2"
+      aria-label="cihuy"
+      autocomplete="off"
+    />
+    <button id="solveBtn" aria-label="Solve math question">cihuy</button>
+    <div id="result" class="result" aria-live="polite"></div>
+    <footer>ini punya rifqi dan neno</footer>
+  </div>
+
+  <script>
+    // Safe math expression evaluator using Function constructor with restrictions
+    (function() {
+      const input = document.getElementById('questionInput');
+      const button = document.getElementById('solveBtn');
+      const resultDiv = document.getElementById('result');
+
+      // Validate allowed characters and operators
+      const allowedChars = /^[0-9+\-*/^().\s]+$/;
+
+      // Function to safely evaluate math expressions
+      function evaluateExpression(expr) {
+        // Replace ^ with ** for exponentiation
+        expr = expr.replace(/\^/g, '**');
+
+        // Disallow any characters outside of allowed set
+        if (!allowedChars.test(expr)) {
+          throw new Error('Invalid characters detected. Please use only numbers and + - * / ^ ( )');
+        }
+
+        // Disallow consecutive operators for some basic sanity
+        if (/[\+\-\*\/\^]{2,}/.test(expr)) {
+          throw new Error('Invalid operator sequence detected.');
+        }
+
+        // Evaluate using Function (safer than eval)
+        // No access to variables or functions outside
+        return Function('"use strict";return (' + expr + ')')();
+      }
+
+      button.addEventListener('click', () => {
+        const expr = input.value.trim();
+        if (!expr) {
+          resultDiv.textContent = '';
+          return;
+        }
+        try {
+          const answer = evaluateExpression(expr);
+          if (answer === Infinity || answer === -Infinity) {
+            resultDiv.innerHTML = '<span class="error">Result is infinity (division by zero?)</span>';
+            return;
+          }
+          if (isNaN(answer)) {
+            resultDiv.innerHTML = '<span class="error">Result is not a number.</span>';
+            return;
+          }
+          resultDiv.textContent = `Answer: ${answer}`;
+          resultDiv.classList.remove('error');
+        } catch (e) {
+          resultDiv.innerHTML = `<span class="error">${e.message}</span>`;
+        }
+      });
+
+      // Also allow Enter key to trigger solve
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          button.click();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+
